@@ -267,7 +267,14 @@ def train(data_train, data_eval, model):
     if backend == 'horovod':
         trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params)
     elif backend == 'byteps':
-        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
+        # -- Use the DistributedTrainer of byteprofile
+        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
+                                block=model,
+                                train_data=data_train, 
+                                ctx=ctxs
+                                )
+        model = trainer.update_model()
+        # trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
     else:
         trainer = mx.gluon.Trainer(param_dict, args.optimizer, optim_params,
                                    update_on_kvstore=False)
@@ -427,6 +434,8 @@ def train(data_train, data_eval, model):
     mx.nd.waitall()
     train_end_time = time.time()
     logging.info('Train cost={:.1f}s'.format(train_end_time - train_begin_time))
+    # -- huhanpeng: return new model
+    return model
 
 if __name__ == '__main__':
     random_seed = random.randint(0, 1000)
@@ -488,7 +497,8 @@ if __name__ == '__main__':
                                         len(ctxs), shuffle, args.num_buckets, vocab,
                                         num_parts=num_workers, part_idx=rank,
                                         num_workers=args.num_data_workers)
-        train(data_train, data_eval, model)
+        # -- huhanpeng: return new model
+        model = train(data_train, data_eval, model)
     if data_eval:
         # eval data is always based on a fixed npz file.
         shuffle = False
