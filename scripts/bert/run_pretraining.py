@@ -271,9 +271,15 @@ def train(data_train, data_eval, model):
         # -- use synthetic data to trace the model
         next_batch = next(iter(get_dummy_dataloader(batch_size, args.max_seq_length, args.max_predictions_per_seq)))
         data_list = list(split_and_load(next_batch, ctxs))
+        (input_id, masked_id, masked_position, masked_weight, \
+         next_sentence_label, segment_id, valid_length) = data_list[0]
+        valid_length = valid_length.astype(args.dtype, copy=False)
+        _batch_data = (input_id, masked_id, masked_position, masked_weight, \
+         next_sentence_label, segment_id, valid_length)
+        
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
                                 block=model,
-                                batch_data=data_list[0], 
+                                batch_data=_batch_data, 
                                 ctx=ctxs
                                 )
         model = trainer.update_model()
