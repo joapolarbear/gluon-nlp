@@ -274,8 +274,8 @@ def train(data_train, data_eval, model):
         (input_id, masked_id, masked_position, masked_weight, \
          next_sentence_label, segment_id, valid_length) = data_list[0]
         valid_length = valid_length.astype(args.dtype, copy=False)
-        _batch_data = (input_id, masked_id, masked_position, masked_weight, \
-         next_sentence_label, segment_id, valid_length)
+        # _batch_data = (input_id, masked_id, masked_position, masked_weight, next_sentence_label, segment_id, valid_length)
+        _batch_data = (input_id, segment_id, valid_length, masked_position)
         
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
                                 block=model.bert,
