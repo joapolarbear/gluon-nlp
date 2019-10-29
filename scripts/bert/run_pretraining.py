@@ -268,12 +268,12 @@ def train(data_train, data_eval, model):
         trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params)
     elif backend == 'byteps':
         # -- Use the DistributedTrainer of byteprofile
+        # -- use synthetic data to trace the model
         next_batch = next(iter(get_dummy_dataloader(batch_size, args.max_seq_length, args.max_predictions_per_seq)))
         data_list = list(split_and_load(next_batch, ctxs))
-        print(data_list)
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
                                 block=model,
-                                batch_data=data_list[0][0], 
+                                batch_data=data_list[0], 
                                 ctx=ctxs
                                 )
         model = trainer.update_model()
