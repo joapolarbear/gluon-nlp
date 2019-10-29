@@ -278,11 +278,11 @@ def train(data_train, data_eval, model):
          next_sentence_label, segment_id, valid_length)
         
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
-                                block=model,
+                                block=model.bert,
                                 batch_data=_batch_data, 
                                 ctx=ctxs
                                 )
-        model = trainer.update_model()
+        model.bert = trainer.update_model()
         # trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
     else:
         trainer = mx.gluon.Trainer(param_dict, args.optimizer, optim_params,
