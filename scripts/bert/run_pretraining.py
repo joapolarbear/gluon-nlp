@@ -280,7 +280,8 @@ def train(data_train, data_eval, model):
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
                                 block=model.bert,
                                 batch_data=_batch_data, 
-                                ctx=ctxs
+                                ctx=ctxs,
+                                data_num=4
                                 )
         model.bert = trainer.update_model()
         # trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
