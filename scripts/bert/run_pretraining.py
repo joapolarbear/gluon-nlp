@@ -267,23 +267,8 @@ def train(data_train, data_eval, model):
     if backend == 'horovod':
         trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params)
     elif backend == 'byteps':
-        # -- Use the DistributedTrainer of byteprofile
-        # -- use synthetic data to trace the model
-        next_batch = next(iter(get_dummy_dataloader(batch_size, args.max_seq_length, args.max_predictions_per_seq)))
-        data_list = list(split_and_load(next_batch, ctxs))
-        (input_id, masked_id, masked_position, masked_weight, \
-         next_sentence_label, segment_id, valid_length) = data_list[0]
-        valid_length = valid_length.astype(args.dtype, copy=False)
-        # _batch_data = (input_id, masked_id, masked_position, masked_weight, next_sentence_label, segment_id, valid_length)
-        _batch_data = (input_id, segment_id, valid_length, masked_position)
-        
-        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params,
-                                block=model.bert,
-                                batch_data=_batch_data, 
-                                ctx=ctxs,
-                                data_num=4
-                                )
-        model.bert = trainer.update_model()
+        # -- Use the DistributedTrainer of byteprofile    
+        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert)
         # trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
     else:
         trainer = mx.gluon.Trainer(param_dict, args.optimizer, optim_params,
