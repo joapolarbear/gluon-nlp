@@ -440,10 +440,12 @@ def profile(curr_step, start_step, end_step, profile_name='profile.json',
                                profile_imperative=True, filename=profile_name,
                                aggregate_stats=True)
         mx.profiler.set_state('run')
+        logging.info("start profiling")
     elif curr_step == end_step:
         mx.nd.waitall()
         mx.profiler.set_state('stop')
         logging.info(mx.profiler.dumps())
         mx.profiler.dump()
+        logging.info("end profiling")
         if early_exit:
             exit()
