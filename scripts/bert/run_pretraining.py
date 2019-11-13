@@ -342,7 +342,7 @@ def train(data_train, data_eval, model):
                     new_lr = lr - offset
                 trainer.set_learning_rate(new_lr)
                 if args.profile:
-                    profile(step_num, 10, 14, profile_name=args.profile + str(rank))
+                    profile(step_num, 10, 100, profile_name=args.profile + str(rank))
                 if early_stop and step_num == 10:
                     mx.nd.waitall()
                     exit()
