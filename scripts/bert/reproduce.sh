@@ -27,7 +27,7 @@ if [ "$1" = "yes" ]; then
 
 	# -- uninstall first
 	cd /usr/local/byteps 
-	pip3 unisntall -y byteps
+	pip3 uninstall -y byteps
 	python3 setup.py clean --all
 
 	# # -- pull and install
@@ -67,8 +67,8 @@ if [ "$1" = "yes" ]; then
 	unzip -o *.zip
 fi
 
-DATA=/root/.mxnet/models/book_corpus_wiki_en_uncased-a6607397.vocab
-
+DATA="/tmp/wiki_en_uncased_data/wiki_en_uncased_0*"
+OPTIMIZER="bertadam"
 cd /root
 
 # optimizer parameters
@@ -138,5 +138,4 @@ python3 /usr/local/byteps/launcher/launch.py \
 		--comm_backend byteps
 
 		# --profile test
-		# --comm_backend byteps
 
