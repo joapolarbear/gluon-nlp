@@ -321,8 +321,6 @@ def train(data_train, data_eval, model):
         trainer._init_params()
 
     while step_num < num_train_steps:
-        #! Use datasetloader for byteps to support profiling I/O
-        data_train = BPSDatasetLoader(data_train)
         data_train_iter = iter(data_train)
         end_of_batch = False
         next_data_batch = next(data_train_iter)
