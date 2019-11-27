@@ -130,7 +130,7 @@ python3 /usr/local/byteps/launcher/launch.py \
 		--max_predictions_per_seq $MAX_PREDICTIONS_PER_SEQ \
 		--num_data_workers 4 \
 		--no_compute_acc \
-		--comm_backend device --log_interval $LOGINTERVAL \
+		--log_interval $LOGINTERVAL \
 		--total_batch_size $TOTAL_BATCH_SIZE \
 		--total_batch_size_eval $TOTAL_BATCH_SIZE \
 		--gpus $NVIDIA_VISIBLE_DEVICES \
