@@ -35,7 +35,7 @@ if [ "$1" = "yes" ]; then
 
 	cd /usr/local 
 	rm -rf byteps
-	git clone --single-branch --branch byteprofile --recurse-submodules https://github.com/joapolarbear/byteps.git 
+	git clone --single-branch --branch byteprofile_io_dev --recurse-submodules https://github.com/joapolarbear/byteps.git 
 	cd /usr/local/byteps 
 
 	BYTEPS_WITHOUT_PYTORCH=1 BYTEPS_WITHOUT_TENSORFLOW=1 python3 setup.py install 
