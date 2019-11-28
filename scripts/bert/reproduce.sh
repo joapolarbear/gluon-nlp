@@ -57,8 +57,8 @@ cd /root
 if [ "$1" = "yes" ]; then
 	if [ $DMLC_ROLE = "worker" ]; then
 	# Set yes to reinstall gluon-nlp and zip, and download dataset.
-	rm -rf gluon-nlp
-	git clone -b test-byteprofile_latency https://github.com/joapolarbear/gluon-nlp.git
+	# rm -rf gluon-nlp
+	# git clone -b test-byteprofile_latency https://github.com/joapolarbear/gluon-nlp.git
 	cd gluon-nlp
 	python3 setup.py install
 	apt-get update && apt-get install -y zip
