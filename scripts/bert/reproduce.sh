@@ -1,5 +1,5 @@
 #!/bin/bash -e
-export BYTEPS_TRACE_ON='1' 
+export BYTEPS_TRACE_ON=1
 export BYTEPS_TRACE_END_STEP=20
 export BYTEPS_TRACE_START_STEP=10
 export BYTEPS_TRACE_DIR='./traces'
@@ -11,6 +11,8 @@ export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	LIBRARY_PATH=/usr/local/lib:/usr/local/cudnn/lib64:/usr/local/cuda/lib64:$LIBRARY_PATH \
 	LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 export https_proxy=http://10.8.77.222:8118 http_proxy=http://10.8.77.222:8118
+
+export MXNET_GPU_WORKER_NTHREADS=1
 
 # ----------------- re-install byteps -----------------
 export DMLC_ROLE="${DMLC_ROLE:-worker}"
