@@ -44,7 +44,7 @@ except ImportError:
     pass
 try:
     import byteps.mxnet as bps
-    from byteps.common.dataloader import BPSDatasetLoader
+    from byteps.mxnet.mx_wrapper import BPSDatasetLoader
 except ImportError:
     pass
 
@@ -269,7 +269,7 @@ def train(data_train, data_eval, model):
         trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params)
     elif backend == 'byteps':
         # -- Use the DistributedTrainer of byteprofile    
-        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert)
+        trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss])
         # trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params)
     else:
         trainer = mx.gluon.Trainer(param_dict, args.optimizer, optim_params,
