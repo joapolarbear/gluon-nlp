@@ -10,7 +10,7 @@ export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	LD_LIBRARY_PATH=/usr/local/cudnn/lib64:/usr/local/cuda/lib64:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/nccl/lib:$LD_LIBRARY_PATH \
 	LIBRARY_PATH=/usr/local/lib:/usr/local/cudnn/lib64:/usr/local/cuda/lib64:$LIBRARY_PATH \
 	LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-export https_proxy=http://10.8.77.222:8118 http_proxy=http://10.8.77.222:8118
+# export https_proxy=http://10.8.77.222:8118 http_proxy=http://10.8.77.222:8118
 
 export MXNET_GPU_WORKER_NTHREADS=1
 

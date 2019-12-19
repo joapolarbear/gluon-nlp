@@ -151,7 +151,7 @@ level = logging.DEBUG if args.verbose else logging.INFO
 logging.getLogger().setLevel(level)
 logging.info(args)
 os.environ['MXNET_GPU_MEM_POOL_TYPE'] = 'Round'
-logging.info(os.environ)
+# logging.info(os.environ)
 
 class DataParallelBERT(nlp.utils.Parallelizable):
     """Data parallel BERT model.
@@ -320,10 +320,10 @@ def train(data_train, data_eval, model):
         parallel.put(data_list[0])
         parallel.get()
         trainer._init_params()
-
-    while step_num < num_train_steps:
         #! Use datasetloader for byteps to support profiling I/O
         data_train = BPSDatasetLoader(data_train)
+
+    while step_num < num_train_steps:
         data_train_iter = iter(data_train)
         end_of_batch = False
         next_data_batch = next(data_train_iter)
