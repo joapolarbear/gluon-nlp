@@ -5,12 +5,14 @@ export BYTEPS_TRACE_START_STEP=10
 export BYTEPS_TRACE_DIR='./traces'
 # export BYTEPS_TRACE_DEBUG=1
 
+# export BYTEPS_TRACE_DELAY_COMM=10
+# export BYTEPS_TRACE_DELAY_CMP=10
+
 export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:${PATH} \
 	LD_LIBRARY_PATH=/usr/local/cudnn/lib64:/usr/local/cuda/lib64:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/nccl/lib:$LD_LIBRARY_PATH \
 	LIBRARY_PATH=/usr/local/lib:/usr/local/cudnn/lib64:/usr/local/cuda/lib64:$LIBRARY_PATH \
 	LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
-# export https_proxy=http://10.8.77.222:8118 http_proxy=http://10.8.77.222:8118
 
 export MXNET_GPU_WORKER_NTHREADS=1
 
@@ -18,35 +20,19 @@ export MXNET_GPU_WORKER_NTHREADS=1
 export DMLC_ROLE="${DMLC_ROLE:-worker}"
 if [ "$1" = "yes" ]; then
 	if [ $DMLC_ROLE = "worker" ]; then
-	update-alternatives --install /usr/bin/gcc gcc $(readlink -f $(which gcc)) 100 
-	update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc $(readlink -f $(which gcc)) 100 
-	update-alternatives --install /usr/bin/g++ g++ $(readlink -f $(which g++)) 100 
-	update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ $(readlink -f $(which g++)) 100
-	update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 200 
-	update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-4.9 200 
-	update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 200 
-	update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-4.9 200
-
 	# -- uninstall first
 	cd /usr/local/byteps 
 	pip3 uninstall -y byteps
 	python3 setup.py clean --all
 
 	# # -- pull and install
-	# git pull
-
 	cd /usr/local 
 	rm -rf byteps
 	git clone --single-branch --branch byteprofile_latency_dev --recurse-submodules https://github.com/joapolarbear/byteps.git 
-	cd /usr/local/byteps 
 
+	cd /usr/local/byteps 
 	BYTEPS_WITHOUT_PYTORCH=1 BYTEPS_WITHOUT_TENSORFLOW=1 python3 setup.py install 
 	BYTEPS_WITHOUT_PYTORCH=1 BYTEPS_WITHOUT_TENSORFLOW=1 python3 setup.py bdist_wheel
-
-	update-alternatives --remove gcc /usr/bin/gcc-4.9 
-	update-alternatives --remove x86_64-linux-gnu-gcc /usr/bin/gcc-4.9 
-	update-alternatives --remove g++ /usr/bin/g++-4.9 
-	update-alternatives --remove x86_64-linux-gnu-g++ /usr/bin/g++-4.9
 	else
 		echo "No need to re-install byteps."
 	fi
