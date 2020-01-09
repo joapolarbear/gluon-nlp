@@ -4,9 +4,7 @@ export BYTEPS_TRACE_END_STEP=20
 export BYTEPS_TRACE_START_STEP=10
 export BYTEPS_TRACE_DIR='./traces'
 # export BYTEPS_TRACE_DEBUG=1
-
-# export BYTEPS_TRACE_DELAY_COMM=10
-# export BYTEPS_TRACE_DELAY_CMP=10
+export MXNET_GPU_WORKER_NTHREADS=1
 
 export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:${PATH} \
@@ -14,30 +12,25 @@ export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	LIBRARY_PATH=/usr/local/lib:/usr/local/cudnn/lib64:/usr/local/cuda/lib64:$LIBRARY_PATH \
 	LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 
-export MXNET_GPU_WORKER_NTHREADS=1
+export TRUNCATE_NORM="${TRUNCATE_NORM:-1}"
+export BYTEPS_BRANCH="${BYTEPS_BRANCH:-byteprofile}"
+export GLUON_NLP_BRANCH="${GLUON_NLP_BRANCH:-bert-byteprofile}"
+export DMLC_ROLE="${DMLC_ROLE:-worker}"
 
 # ----------------- re-install byteps -----------------
-export DMLC_ROLE="${DMLC_ROLE:-worker}"
 if [ "$1" = "yes" ]; then
-	if [ $DMLC_ROLE = "worker" ]; then
-	# -- uninstall first
 	cd /usr/local/byteps 
 	pip3 uninstall -y byteps
 	python3 setup.py clean --all
 
-	# # -- pull and install
 	cd /usr/local 
 	rm -rf byteps
-	git clone --single-branch --branch byteprofile_latency_dev --recurse-submodules https://github.com/joapolarbear/byteps.git 
+	git clone --single-branch --branch $BYTEPS_BRANCH --recurse-submodules https://github.com/joapolarbear/byteps.git 
 
-	cd /usr/local/byteps 
+	cd /usr/local/byteps
 	BYTEPS_WITHOUT_PYTORCH=1 BYTEPS_WITHOUT_TENSORFLOW=1 python3 setup.py install 
 	BYTEPS_WITHOUT_PYTORCH=1 BYTEPS_WITHOUT_TENSORFLOW=1 python3 setup.py bdist_wheel
-	else
-		echo "No need to re-install byteps."
-	fi
 fi
-
 
 # ---------------------- start to run ----------------------
 cd /root
@@ -45,19 +38,22 @@ cd /root
 if [ "$1" = "yes" ]; then
 	if [ $DMLC_ROLE = "worker" ]; then
 	# Set yes to reinstall gluon-nlp and zip, and download dataset.
-	# rm -rf gluon-nlp
-	# git clone -b test-byteprofile_latency https://github.com/joapolarbear/gluon-nlp.git
+	rm -rf gluon-nlp
+	git clone -b $GLUON_NLP_BRANCH https://github.com/joapolarbear/gluon-nlp.git
 	cd gluon-nlp
 	python3 setup.py install
-	apt-get update && apt-get install -y zip
 	mkdir -p /root/.mxnet/models
 	cd /root/.mxnet/models 
 	wget https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/gluon/dataset/vocab/book_corpus_wiki_en_uncased-a6607397.zip
+	unset https_proxy http_proxy no_proxy
+	apt-get update && apt-get install -y zip
 	unzip -o *.zip
 	else
 		echo "No need to re-install gluon-nlp."
 	fi
 fi
+
+# ---------------------- start to run ----------------------
 
 DATA="/tmp/wiki_en_uncased_data/wiki_en_uncased_0*"
 OPTIMIZER="bertadam"
