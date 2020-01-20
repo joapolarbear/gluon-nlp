@@ -1,10 +1,13 @@
 #!/bin/bash -e
-export BYTEPS_TRACE_ON=1
-export BYTEPS_TRACE_END_STEP=20
-export BYTEPS_TRACE_START_STEP=10
-export BYTEPS_TRACE_DIR='./traces'
+export BYTEPS_TRACE_ON="${BYTEPS_TRACE_ON:-1}"
+export BYTEPS_TRACE_END_STEP="${BYTEPS_TRACE_END_STEP:-20}"
+export BYTEPS_TRACE_START_STEP="${BYTEPS_TRACE_START_STEP:-10}"
+export BYTEPS_TRACE_DIR="${BYTEPS_TRACE_DIR:-'./traces'}"
 # export BYTEPS_TRACE_DEBUG=1
 export MXNET_GPU_WORKER_NTHREADS=1
+
+# install dependencies
+apt-get update && apt-get install -y librdmacm-dev
 
 export USE_CUDA_PATH=/usr/local/cuda:/usr/local/cudnn/lib64 \
 	PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:${PATH} \
@@ -46,7 +49,7 @@ if [ "$1" = "yes" ]; then
 	cd /root/.mxnet/models 
 	wget https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/gluon/dataset/vocab/book_corpus_wiki_en_uncased-a6607397.zip
 	unset https_proxy http_proxy no_proxy
-	apt-get update && apt-get install -y zip
+	apt-get install -y zip
 	unzip -o *.zip
 	else
 		echo "No need to re-install gluon-nlp."
@@ -96,8 +99,8 @@ export DATA="${DATA:-/data/book-corpus/book-corpus-large-split/*.train,/data/enw
 export DATAEVAL="${DATAEVAL:-/data/book-corpus/book-corpus-large-split/*.test,/data/enwiki/enwiki-feb-doc-split/*.test}"
 
 echo "NVIDIA_VISIBLE_DEVICES: $NVIDIA_VISIBLE_DEVICES"
-
-TOTAL_BATCH_SIZE=10
+readarray -d , -t strarr <<<"$NVIDIA_VISIBLE_DEVICES"
+TOTAL_BATCH_SIZE=$(($DMLC_NUM_WORKER*${#strarr[*]}*10))
 echo "total batch size is $TOTAL_BATCH_SIZE"
 
 python3 /usr/local/byteps/launcher/launch.py \
