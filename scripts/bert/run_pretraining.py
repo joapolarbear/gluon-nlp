@@ -236,8 +236,6 @@ assert batch_size > 0
 assert batch_size_eval > 0
 logging.info("{} / {}".format(rank, num_workers))
 
-early_stop = os.environ.get('HOROVOD_TIMELINE', None)
-
 def train(data_train, data_eval, model):
     """Training function."""
     # backend specific implementation
@@ -345,9 +343,6 @@ def train(data_train, data_eval, model):
                 trainer.set_learning_rate(new_lr)
                 if args.profile:
                     profile(step_num, 10, 100, profile_name=args.profile + str(rank))
-                if early_stop and step_num == 10:
-                    mx.nd.waitall()
-                    exit()
 
             # load data
             data_list = list(split_and_load(data_batch, ctxs))
