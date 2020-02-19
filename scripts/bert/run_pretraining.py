@@ -264,7 +264,7 @@ def train(data_train, data_eval, model):
 
     # backend specific implementation
     if backend == 'horovod':
-        trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params)
+        trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss])
     elif backend == 'byteps':
         # -- Use the DistributedTrainer of byteprofile    
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss])
