@@ -40,6 +40,7 @@ import mxnet as mx
 import gluonnlp as nlp
 try:
     import horovod.mxnet as hvd
+    from horovod.mxnet.dataloader import HVDDatasetLoader
 except ImportError:
     pass
 try:
@@ -320,6 +321,8 @@ def train(data_train, data_eval, model):
         trainer._init_params()
         #! Use datasetloader for byteps to support profiling I/O
         data_train = BPSDatasetLoader(data_train)
+    elif backend == 'horovod':
+        data_train = HVDDatasetLoader(data_train)
 
     while step_num < num_train_steps:
         data_train_iter = iter(data_train)
