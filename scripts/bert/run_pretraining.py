@@ -453,9 +453,9 @@ if __name__ == '__main__':
     model, vocab = get_model_loss(ctxs, args.model, args.pretrained,
                                   dataset_name, vocab, args.dtype,
                                   ckpt_dir=args.ckpt_dir,
-                                  start_step=args.start_step)
+                                  start_step=args.start_step,
+                                  verbose=args.verbose)
     logging.debug('Model created')
-    logging.debug("Model created")
     data_eval = args.data_eval
 
     if args.raw:
@@ -476,7 +476,6 @@ if __name__ == '__main__':
                 generate_dev_set(tokenizer, vocab, cache_file, args)
 
     logging.debug('Random seed set to %d', random_seed)
-    logging.debug('Random seed set to %d'%random_seed)
     mx.random.seed(random_seed)
 
     if args.data:
