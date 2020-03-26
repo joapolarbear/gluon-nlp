@@ -54,7 +54,6 @@ from pretraining_utils import get_model_loss, get_pretrain_data_npz, get_dummy_d
 from pretraining_utils import split_and_load, log, log_noacc, evaluate
 from pretraining_utils import save_parameters, save_states, profile
 from pretraining_utils import get_pretrain_data_text, generate_dev_set
-
 # parser
 parser = argparse.ArgumentParser(description='BERT pretraining example.')
 # logging and serialization
@@ -229,6 +228,7 @@ def init_comm(backend):
 
 backend = args.comm_backend
 store, num_workers, rank, local_rank, is_master_node, ctxs = init_comm(backend)
+logging.debug("initialized comm backend, ctxs %s:%s" % (str(ctxs[0]), type(ctxs[0])))
 assert args.total_batch_size % (args.accumulate * num_workers) == 0
 assert args.total_batch_size_eval % (args.accumulate * num_workers) == 0
 batch_size = int(args.total_batch_size / num_workers / args.accumulate / len(ctxs))
@@ -306,8 +306,10 @@ def train(data_train, data_eval, model):
     logging.info('Generating the first batch of data, which may take a few minutes ...')
 
     # create dummy data loader if needed
+    logging.debug('DataParallelBERT')
     parallel_model = DataParallelBERT(model, trainer=fp16_trainer)
     num_ctxes = len(ctxs)
+    logging.debug('nlp.utils.Parallel')
     parallel = nlp.utils.Parallel(num_ctxes if num_ctxes > 1 else 0, parallel_model)
 
     if backend == 'byteps':
@@ -325,8 +327,10 @@ def train(data_train, data_eval, model):
         data_train = HVDDatasetLoader(data_train)
 
     while step_num < num_train_steps:
+        logging.debug('Get the data iterator...')
         data_train_iter = iter(data_train)
         end_of_batch = False
+        logging.debug('Fetch next batch ...')
         next_data_batch = next(data_train_iter)
         while not end_of_batch:
             data_batch = next_data_batch
@@ -353,6 +357,7 @@ def train(data_train, data_eval, model):
             ns_label_list, ns_pred_list = [], []
             mask_label_list, mask_pred_list, mask_weight_list = [], [], []
 
+            logging.debug("Start forward")
             with mx.autograd.record():
                 num_data = len(data_list)
                 for i in range(num_data):
@@ -444,11 +449,13 @@ if __name__ == '__main__':
             dataset_name = None
         vocab = nlp.vocab.BERTVocab.from_sentencepiece(args.sentencepiece)
 
+    logging.debug("start to get_model_loss and vocab ")
     model, vocab = get_model_loss(ctxs, args.model, args.pretrained,
                                   dataset_name, vocab, args.dtype,
                                   ckpt_dir=args.ckpt_dir,
                                   start_step=args.start_step)
     logging.debug('Model created')
+    logging.debug("Model created")
     data_eval = args.data_eval
 
     if args.raw:
@@ -469,6 +476,7 @@ if __name__ == '__main__':
                 generate_dev_set(tokenizer, vocab, cache_file, args)
 
     logging.debug('Random seed set to %d', random_seed)
+    logging.debug('Random seed set to %d'%random_seed)
     mx.random.seed(random_seed)
 
     if args.data:
@@ -484,15 +492,18 @@ if __name__ == '__main__':
             get_dataset_fn = get_pretrain_data_npz
 
         if args.synthetic_data:
+            logging.debug("For synthetic_data, get_dummy_dataloader ...")
             data_train = get_dummy_dataloader(batch_size, args.max_seq_length,
                                               args.max_predictions_per_seq)
         else:
             shuffle = True
+            logging.debug("For non-synthetic_data, get_dataset_fn ...")
             data_train = get_dataset_fn(args.data, batch_size,
                                         len(ctxs), shuffle, args.num_buckets, vocab,
                                         num_parts=num_workers, part_idx=rank,
                                         num_workers=args.num_data_workers)
         # -- huhanpeng: return new model
+        logging.debug("Training start...")
         model = train(data_train, data_eval, model)
     if data_eval:
         # eval data is always based on a fixed npz file.

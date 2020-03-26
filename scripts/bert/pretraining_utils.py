@@ -30,6 +30,10 @@ from data.pretrain import BERTSamplerFn, BERTDataLoaderFn
 from data.dataloader import SimpleDatasetFn, DatasetLoader
 from create_pretraining_data import create_training_instances
 
+is_debug = False if os.environ.get("GLUON_DEBUG", None) is None else True
+def gluon_debug(str):
+    if is_debug:
+        print(str)
 
 __all__ = ['get_model_loss', 'get_pretrain_data_npz', 'get_dummy_dataloader',
            'save_parameters', 'save_states', 'evaluate', 'split_and_load',
@@ -68,17 +72,20 @@ def get_model_loss(ctx, model, pretrained, dataset_name, vocab, dtype,
     BERTVocab : the vocabulary.
     """
     # model
+    gluon_debug("Getting model ...")
     model, vocabulary = nlp.model.get_model(model, dataset_name=dataset_name, vocab=vocab,
                                             pretrained=pretrained, ctx=ctx)
-
+    gluon_debug("Model got, model of type %s" % (type(model)))
     if not pretrained:
         import os
         if int(os.environ.get('TRUNCATE_NORM', False)):
             import logging
             logging.info('Using truncated norm initialization')
-            model.initialize(init=nlp.initializer.TruncNorm(0.02), ctx=ctx)
+            gluon_debug("Using truncated norm initialization")
+            model.initialize(init=nlp.initializer.TruncNorm(0.02), ctx=ctx, verbose=is_debug)
         else:
             model.initialize(init=mx.init.Normal(0.02), ctx=ctx)
+    gluon_debug("Model initialized")
     model.cast(dtype)
 
     if ckpt_dir and start_step:
@@ -94,6 +101,7 @@ def get_model_loss(ctx, model, pretrained, dataset_name, vocab, dtype,
     nsp_loss.hybridize(static_alloc=True, static_shape=True)
     mlm_loss.hybridize(static_alloc=True, static_shape=True)
 
+    gluon_debug("Model hybridized")
     model = BERTForPretrain(model, nsp_loss, mlm_loss, len(vocabulary))
     return model, vocabulary
 
