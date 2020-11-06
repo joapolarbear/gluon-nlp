@@ -504,12 +504,14 @@ if __name__ == '__main__':
         # -- huhanpeng: return new model
         logging.debug("Training start...")
         model = train(data_train, data_eval, model)
-    if data_eval:
-        # eval data is always based on a fixed npz file.
-        shuffle = False
-        dataset_eval = get_pretrain_data_npz(data_eval, batch_size_eval,
-                                             len(ctxs), shuffle, 1, vocab)
 
-        evaluate(dataset_eval, model, ctxs, args.log_interval, args.dtype, local_rank, 8)
-    while True:
-        time.sleep(999999999)
+    # if data_eval:
+    #     # eval data is always based on a fixed npz file.
+    #     shuffle = False
+    #     dataset_eval = get_pretrain_data_npz(data_eval, batch_size_eval,
+    #                                          len(ctxs), shuffle, 1, vocab)
+
+    #     evaluate(dataset_eval, model, ctxs, args.log_interval, args.dtype, local_rank, 8)
+    
+    # while True:
+    #     time.sleep(999999999)
