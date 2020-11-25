@@ -151,7 +151,7 @@ level = logging.DEBUG if args.verbose else logging.INFO
 logging.getLogger().setLevel(level)
 logging.info(args)
 os.environ['MXNET_GPU_MEM_POOL_TYPE'] = 'Round'
-logging.info(os.environ)
+# logging.info(os.environ)
 
 class DataParallelBERT(nlp.utils.Parallelizable):
     """Data parallel BERT model.
@@ -265,7 +265,8 @@ def train(data_train, data_eval, model):
 
     # backend specific implementation
     if backend == 'horovod':
-        trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss])
+        data_shapes = [e.shape for e in list(split_and_load(next(iter(data_train)), ctxs))[0]]
+        trainer = hvd.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss], data_shape=data_shapes)
     elif backend == 'byteps':
         # -- Use the DistributedTrainer of byteprofile    
         trainer = bps.DistributedTrainer(param_dict, args.optimizer, optim_params, block=model.bert, loss=[None, None, model.nsp_loss, model.mlm_loss])
